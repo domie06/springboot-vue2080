@@ -1,0 +1,76 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.dao.ShiguDao">
+
+    <!-- 通用查询结果列 -->
+    <sql id="Base_Column_List">
+        a.id as id
+        ,a.car_id as carId
+        ,a.insert_time as insertTime
+        ,a.shigu_types as shiguTypes
+        ,a.shigu_photo as shiguPhoto
+        ,a.shiguchuli_types as shiguchuliTypes
+        ,a.shigu_content as shiguContent
+        ,a.create_time as createTime
+    </sql>
+    <select id="selectListView" parameterType="map" resultType="com.entity.view.ShiguView" >
+        SELECT
+        <include refid="Base_Column_List" />
+
+--         级联表的字段
+        ,car.jiashiyuan_id as jiashiyuanId
+        ,car.car_number as carNumber
+        ,car.chejia_number as chejiaNumber
+        ,car.goumai_time as goumaiTime
+        ,car.car_content as carContent
+
+        FROM shigu  a
+        left JOIN car car ON a.car_id = car.id
+
+        <where>
+            <if test="params.carId != null">
+                and a.car_id = #{params.carId}
+            </if>
+            <if test=" params.insertTimeStart != '' and params.insertTimeStart != null ">
+                <![CDATA[  and DATE_FORMAT(a.insert_time, '%Y-%m-%d %H:%T:%s') >=
+                DATE_FORMAT(#{params.insertTimeStart}, '%Y-%m-%d %H:%T:%s')   ]]>
+            </if>
+            <if test=" params.insertTimeEnd != '' and params.insertTimeEnd != null ">
+                <![CDATA[  and DATE_FORMAT(a.insert_time, '%Y-%m-%d %H:%T:%s') <=
+                DATE_FORMAT(#{params.insertTimeEnd} , '%Y-%m-%d %H:%T:%s')    ]]>
+            </if>
+            <if test="params.shiguTypes != null">
+                and a.shigu_types = #{params.shiguTypes}
+            </if>
+            <if test="params.shiguchuliTypes != null">
+                and a.shiguchuli_types = #{params.shiguchuliTypes}
+            </if>
+            <if test=" params.shiguContent != '' and params.shiguContent != null and params.shiguContent != 'null' ">
+                and a.shigu_content like CONCAT('%',#{params.shiguContent},'%')
+            </if>
+
+            <if test="params.jiashiyuanId != null">
+                and car.jiashiyuan_id = #{params.jiashiyuanId}
+            </if>
+            <if test=" params.carNumber != '' and params.carNumber != null and params.carNumber != 'null' ">
+                and car.car_number like CONCAT('%',#{params.carNumber},'%')
+            </if>
+            <if test=" params.chejiaNumber != '' and params.chejiaNumber != null and params.chejiaNumber != 'null' ">
+                and car.chejia_number like CONCAT('%',#{params.chejiaNumber},'%')
+            </if>
+            <if test=" params.goumaiTimeStart != '' and params.goumaiTimeStart != null ">
+                <![CDATA[  and DATE_FORMAT(car.goumai_time, '%Y-%m-%d %H:%T:%s') >=
+                DATE_FORMAT(#{params.goumaiTimeStart}, '%Y-%m-%d %H:%T:%s')   ]]>
+            </if>
+            <if test=" params.goumaiTimeEnd != '' and params.goumaiTimeEnd != null ">
+                <![CDATA[  and DATE_FORMAT(car.goumai_time, '%Y-%m-%d %H:%T:%s') <=
+                DATE_FORMAT(#{params.goumaiTimeEnd} , '%Y-%m-%d %H:%T:%s')    ]]>
+            </if>
+            <if test=" params.carContent != '' and params.carContent != null and params.carContent != 'null' ">
+                and car.car_content like CONCAT('%',#{params.carContent},'%')
+            </if>
+        </where>
+        order by a.id desc
+    </select>
+
+</mapper>

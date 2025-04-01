@@ -1,0 +1,88 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.dao.CarDao">
+
+    <!-- 通用查询结果列 -->
+    <sql id="Base_Column_List">
+        a.id as id
+        ,a.jiashiyuan_id as jiashiyuanId
+        ,a.car_number as carNumber
+        ,a.chejia_number as chejiaNumber
+        ,a.goumai_time as goumaiTime
+        ,a.car_content as carContent
+        ,a.create_time as createTime
+    </sql>
+    <select id="selectListView" parameterType="map" resultType="com.entity.view.CarView" >
+        SELECT
+        <include refid="Base_Column_List" />
+
+--         级联表的字段
+        ,jiashiyuan.card_number as cardNumber
+        ,jiashiyuan.name as name
+        ,jiashiyuan.sex_types as sexTypes
+        ,jiashiyuan.id_number as idNumber
+        ,jiashiyuan.phone as phone
+        ,jiashiyuan.jiashiyuan_photo as jiashiyuanPhoto
+        ,jiashiyuan.age as age
+        ,jiashiyuan.politics_types as politicsTypes
+        ,jiashiyuan.address as address
+
+        FROM car  a
+        left JOIN jiashiyuan jiashiyuan ON a.jiashiyuan_id = jiashiyuan.id
+
+        <where>
+            <if test="params.jiashiyuanId != null">
+                and a.jiashiyuan_id = #{params.jiashiyuanId}
+            </if>
+            <if test=" params.carNumber != '' and params.carNumber != null and params.carNumber != 'null' ">
+                and a.car_number like CONCAT('%',#{params.carNumber},'%')
+            </if>
+            <if test=" params.chejiaNumber != '' and params.chejiaNumber != null and params.chejiaNumber != 'null' ">
+                and a.chejia_number like CONCAT('%',#{params.chejiaNumber},'%')
+            </if>
+            <if test=" params.goumaiTimeStart != '' and params.goumaiTimeStart != null ">
+                <![CDATA[  and DATE_FORMAT(a.goumai_time, '%Y-%m-%d %H:%T:%s') >=
+                DATE_FORMAT(#{params.goumaiTimeStart}, '%Y-%m-%d %H:%T:%s')   ]]>
+            </if>
+            <if test=" params.goumaiTimeEnd != '' and params.goumaiTimeEnd != null ">
+                <![CDATA[  and DATE_FORMAT(a.goumai_time, '%Y-%m-%d %H:%T:%s') <=
+                DATE_FORMAT(#{params.goumaiTimeEnd} , '%Y-%m-%d %H:%T:%s')    ]]>
+            </if>
+            <if test=" params.carContent != '' and params.carContent != null and params.carContent != 'null' ">
+                and a.car_content like CONCAT('%',#{params.carContent},'%')
+            </if>
+
+            <if test=" params.cardNumber != '' and params.cardNumber != null and params.cardNumber != 'null' ">
+                and jiashiyuan.card_number like CONCAT('%',#{params.cardNumber},'%')
+            </if>
+            <if test=" params.name != '' and params.name != null and params.name != 'null' ">
+                and jiashiyuan.name like CONCAT('%',#{params.name},'%')
+            </if>
+            <if test="params.sexTypes != null">
+                and jiashiyuan.sex_types = #{params.sexTypes}
+            </if>
+
+            <if test=" params.idNumber != '' and params.idNumber != null and params.idNumber != 'null' ">
+                and jiashiyuan.id_number like CONCAT('%',#{params.idNumber},'%')
+            </if>
+            <if test=" params.phone != '' and params.phone != null and params.phone != 'null' ">
+                and jiashiyuan.phone like CONCAT('%',#{params.phone},'%')
+            </if>
+            <if test="params.ageStart != null ">
+                <![CDATA[  and jiashiyuan.age >= #{params.ageStart}   ]]>
+            </if>
+            <if test="params.ageEnd != null ">
+                <![CDATA[  and jiashiyuan.age <= #{params.ageEnd}   ]]>
+            </if>
+            <if test="params.politicsTypes != null">
+                and jiashiyuan.politics_types = #{params.politicsTypes}
+            </if>
+
+            <if test=" params.address != '' and params.address != null and params.address != 'null' ">
+                and jiashiyuan.address like CONCAT('%',#{params.address},'%')
+            </if>
+        </where>
+        order by a.id desc
+    </select>
+
+</mapper>
